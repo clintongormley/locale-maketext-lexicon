@@ -590,7 +590,13 @@ sub normalize_space {
 =cut
 
 sub msgids    { sort keys %{ $_[0]{lexicon} } }
-sub has_msgid { length $_[0]->msgstr( $_[1] ) }
+sub has_msgid {
+    if ($_[0]->msgstr( $_[1] )) {
+        return length $_[0]->msgstr( $_[1] );
+    } else {
+        return 0;
+    }   
+}
 
 sub msg_positions {
     my ( $self, $msgid ) = @_;
