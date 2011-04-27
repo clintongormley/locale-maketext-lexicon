@@ -3,6 +3,8 @@ $Locale::Maketext::Extract::VERSION = '0.38';
 
 use strict;
 use Locale::Maketext::Lexicon();
+use Class::Load ();
+
 
 =head1 NAME
 
@@ -327,14 +329,13 @@ sub plugins {
 
         foreach my $name ( keys %params ) {
             my $plugin_class = $Known_Plugins{$name} || $name;
-            my $filename = $plugin_class . '.pm';
-            $filename =~ s/::/\//g;
-            local $@;
-            eval {
-                require $filename && 1;
-                1;
-            } or next;
-            push @plugins, $plugin_class->new( $params{$name} );
+            my ($status, $err) = Class::Load::try_load_class($plugin_class);
+            if ($status == 1) {
+                push @plugins, $plugin_class->new( $params{$name} );
+            } else {
+                print STDERR "$err\n"
+                    if $self->{verbose};
+            }
         }
         $self->{plugins} = \@plugins;
     }

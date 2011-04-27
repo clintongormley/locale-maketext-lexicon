@@ -26,6 +26,7 @@ recommends:
   YAML: 0.66
   YAML::Loader: 0.66
 requires:
+  Class::Load: 0.06
   Locale::Maketext: 1.17
   perl: 5.005
 resources:
