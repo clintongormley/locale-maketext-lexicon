@@ -11,6 +11,7 @@ perl_version '5.005';
 all_from 'lib/Locale/Maketext/Lexicon.pm';
 install_script 'script/xgettext.pl';
 requires 'Locale::Maketext'       => '1.17';
+requires 'Class::Load'            => '0.06';
 recommends 'Template'             => '2.20';
 recommends 'Template::Constants'  => '2.75';
 recommends 'YAML'                 => '0.66';
