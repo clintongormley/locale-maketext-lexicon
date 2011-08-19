@@ -38,6 +38,12 @@ Valid formats are:
 
 =item [% l('string',args) %]
 
+=item [% c.l('string') %]
+
+Also all the above combinations with C<c.> prepended should work
+correctly. This is the default syntax when using TT templates
+with L<Mojolicious>.
+
 =back
 
 l and loc are interchangeable.
@@ -278,9 +284,24 @@ sub ident {
             $name .= join_args($args);
             push( @dotted, $name );
         }
+
+        my $got_i18n = 0;
+
+        # Classic TT syntax [% l('...') %] or [% loc('....') %]
         if ( $first_literal
              && ( $ident->[0] eq "'l'" or $ident->[0] eq "'loc'" ) )
         {
+           $got_i18n = 1;
+        }
+
+        # Mojolicious TT syntax [% c.l('...') %]
+        elsif ($ident->[0] eq "'c'" && $ident->[2] eq "'l'")
+        {
+           $got_i18n = 1;
+           splice(@$ident, 0, 2);
+        }
+
+        if ($got_i18n) {
             my $string = shift @{ $ident->[1] };
             strip_quotes($string);
             $string =~ s/\\\\/\\/g;
@@ -334,7 +355,8 @@ sub filter {
     $name = $name->[0];
     return ''
         unless $name eq "'l'"
-            or $name eq "'loc'";
+            or $name eq "'loc'"
+            or $name eq "'c.l'";
     if ( strip_quotes($block) ) {
         $block =~ s/\\\\/\\/g;
         $args = join_args( $class->args($args) );

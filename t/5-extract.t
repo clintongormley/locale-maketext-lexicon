@@ -1,7 +1,7 @@
 #! /usr/bin/perl -w
 use lib '../lib';
 use strict;
-use Test::More tests => 76;
+use Test::More tests => 78;
 
 use_ok('Locale::Maketext::Extract');
 my $Ext = Locale::Maketext::Extract->new();
@@ -955,6 +955,19 @@ __TT__
 #. (b.method.$var(arg), c("arg").method.5)
 #: :1
 msgid "string"
+msgstr ""
+__EXAMPLE__
+
+    extract_ok(
+        q([% c.l('Hello, world!') %]) => "Hello, world!",
+        "Mojolicious syntax is supported correctly",
+    );
+
+    write_po_ok( <<'__TT__' => <<'__EXAMPLE__', 'Mojolicious and filter syntax' );
+[% 'my string' | c.l %]
+__TT__
+#: :1
+msgid "my string"
 msgstr ""
 __EXAMPLE__
 
