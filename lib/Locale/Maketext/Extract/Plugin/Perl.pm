@@ -46,6 +46,8 @@ Valid localization function names are:
 
 =item x
 
+=item l
+
 =item _
 
 =item __
