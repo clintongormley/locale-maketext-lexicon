@@ -1,7 +1,7 @@
 #! /usr/bin/perl -w
 use lib '../lib';
 use strict;
-use Test::More;# tests => 87;
+use Test::More tests => 297;
 
 use_ok('Locale::Maketext::Extract');
 my $Ext = Locale::Maketext::Extract->new();
@@ -295,6 +295,3 @@ sub write_po_ok {
     is( substr( $result, $start_expected ), $expected, $info );
     $Ext->clear;
 }
-
-
-done_testing;
