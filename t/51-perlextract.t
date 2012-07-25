@@ -8,63 +8,71 @@ my $Ext = Locale::Maketext::Extract->new(
             plugins => { 'Locale::Maketext::Extract::Plugin::Perl' => '*' } );
 
 # Standard Perl parser
-run_tests('perl - ');
+my @perl_alias_terms = qw/l _ translate maketext gettext __/;
+run_tests('perl - ', \@perl_alias_terms);
 
 SKIP: {
     # PPI parser
     skip( 'PPI unavailable', 44 ) unless eval { require PPI };
     $Ext = Locale::Maketext::Extract->new(
-             plugins => { 'Locale::Maketext::Extract::Plugin::PPI' => '*' } );
-    run_tests('ppi - ');
+        plugins => { 'Locale::Maketext::Extract::Plugin::PPI' => '*' } );
+    my $maketext_aliases = ['_'];
+    run_tests('ppi - ', $maketext_aliases);
 }
 
 sub run_tests {
-    my $prefix = shift;
+    my ($prefix, $alias_terms) = @_;
     isa_ok( $Ext => 'Locale::Maketext::Extract' );
+    foreach my $alias ( @$alias_terms ) {
+        test_extract_on_alias($alias, $prefix);
+    }
+}
 
+sub test_extract_on_alias {
+    my ($alias, $prefix) = @_;
     #### BEGIN PERL TESTS ############
-    extract_ok( '_("123")' => 123, $prefix . 'Simple extraction' );
-
-    extract_ok( '_("[_1] is happy")' => '%1 is happy',
+    extract_ok( $alias.'("123")' => 123, $prefix . 'Simple extraction' );
+    
+    extract_ok( $alias.'("[_1] is happy")' => '%1 is happy',
                 $prefix . '[_1] to %1' );
-    extract_ok( '_("%1 is happy")' => '%1 is happy',
+    extract_ok( $alias.'("%1 is happy")' => '%1 is happy',
                 $prefix . '%1 verbatim', 1 );
 
-    extract_ok( '_("[*,_1] counts")' => '%*(%1) counts',
+    extract_ok( $alias.'("[*,_1] counts")' => '%*(%1) counts',
                 $prefix . '[*,_1] to %*(%1)' );
-    extract_ok( '_("%*(%1) counts")' => '%*(%1) counts',
+    extract_ok( $alias.'("%*(%1) counts")' => '%*(%1) counts',
                 $prefix . '%*(%1) verbatim', 1 );
 
-    extract_ok( '_("[*,_1,_2] counts")' => '%*(%1,%2) counts',
+    extract_ok( $alias.'("[*,_1,_2] counts")' => '%*(%1,%2) counts',
                 $prefix . '[*,_1,_2] to %*(%1,%2)' );
-    extract_ok( '_("[*,_1,_2] counts")' => '[*,_1,_2] counts',
+    extract_ok( $alias.'("[*,_1,_2] counts")' => '[*,_1,_2] counts',
                 $prefix . '[*,_1,_2] verbatim', 1 );
-    extract_ok( q(_('foo\$bar')) => 'foo\\$bar',
+    extract_ok( $alias.q(('foo\$bar')) => 'foo\\$bar',
                 $prefix . 'Escaped \$ in q' );
-    extract_ok( q(_("foo\$bar")) => 'foo$bar',
+    extract_ok( $alias.q(("foo\$bar")) => 'foo$bar',
                 $prefix . 'Normalized \$ in qq' );
 
-    extract_ok( q(_('foo\x20bar')) => 'foo\\x20bar',
+    extract_ok( $alias.q(('foo\x20bar')) => 'foo\\x20bar',
                 $prefix . 'Escaped \x in q' );
-    extract_ok( q(_("foo\x20bar")) => 'foo bar',
+    extract_ok( $alias.q(("foo\x20bar")) => 'foo bar',
                 $prefix . 'Normalized \x in qq' );
 
-    extract_ok( q(_('foo\nbar')) => 'foo\\nbar',
+    extract_ok( $alias.q(('foo\nbar')) => 'foo\\nbar',
                 $prefix . 'Escaped \n in qq' );
-    extract_ok( q(_("foo\nbar")) => "foo\nbar",
+    extract_ok( $alias.q(("foo\nbar")) => "foo\nbar",
                 $prefix . 'Normalized \n in qq' );
-    extract_ok( qq(_("foo\nbar")) => "foo\nbar",
+    extract_ok( $alias.qq(("foo\nbar")) => "foo\nbar",
                 $prefix . 'Normalized literal \n in qq' );
 
-    extract_ok( q(_("foo\nbar")) => "foo\nbar",
+    extract_ok( $alias.q(("foo\nbar")) => "foo\nbar",
                 $prefix . 'Trailing \n in qq' );
-    extract_ok( qq(_("foobar\n")) => "foobar\n",
+    extract_ok( $alias.qq(("foobar\n")) => "foobar\n",
                 $prefix . 'Trailing literal \n in qq' );
 
-    extract_ok( q(_('foo\bar')) => 'foo\\bar', $prefix . 'Escaped \ in q' );
-    extract_ok( q(_('foo\\\\bar')) => 'foo\\bar',
+    extract_ok( $alias.q(('foo\bar')) => 'foo\\bar', $prefix . 'Escaped \ in q' );
+    extract_ok( $alias.q(('foo\\\\bar')) => 'foo\\bar',
                 $prefix . 'Normalized \\\\ in q' );
-    extract_ok( q(_("foo\bar")) => "foo\bar",
+    extract_ok( $alias.q(("foo\bar")) => "foo\bar",
                 $prefix . 'Interpolated \b in qq' );
 
     extract_ok( q(l( 'foo "bar" baz' );) => 'foo "bar" baz',
@@ -73,25 +81,25 @@ sub run_tests {
     extract_ok( q([% loc( 'foo "bar" baz' ) %]) => 'foo "bar" baz',
                 $prefix . 'Escaped double quote in text' );
 
-    extract_ok( q( _(q{foo bar})) => "foo bar",  $prefix . 'No escapes' );
-    extract_ok( q(_(q{foo\bar}))  => 'foo\\bar', $prefix . 'Escaped \ in q' );
-    extract_ok( q(_(q{foo\\\\bar})) => 'foo\\bar',
+    extract_ok( $alias.q((q{foo bar})) => "foo bar",  $prefix . 'No escapes' );
+    extract_ok( $alias.q((q{foo\bar}))  => 'foo\\bar', $prefix . 'Escaped \ in q' );
+    extract_ok( $alias.q((q{foo\\\\bar})) => 'foo\\bar',
                 $prefix . 'Normalized \\\\ in q' );
-    extract_ok( q(_(qq{foo\bar})) => "foo\bar",
+    extract_ok( $alias.q((qq{foo\bar})) => "foo\bar",
                 $prefix . 'Interpolated \b in qq' );
-
-    extract_ok( q(my $x = loc('I "think" you\'re a cow.') . "\n";) =>
+    
+    
+    extract_ok( q(my $x = ).$alias.q(('I "think" you\'re a cow.') . "\n";) =>
                     'I "think" you\'re a cow.',
                 $prefix . "Handle escaped single quotes"
     );
-
-    extract_ok( q(my $x = loc("I'll poke you like a \"cow\" man.") . "\n";) =>
+    extract_ok( q(my $x = ).$alias.q(("I'll poke you like a \"cow\" man.") . "\n";) =>
                     'I\'ll poke you like a "cow" man.',
                 $prefix . "Handle escaped double quotes"
     );
 
-    extract_ok( q(_("","car")) => '', $prefix . 'ignore empty string' );
-    extract_ok( q(_("0"))      => '', $prefix . 'ignore zero' );
+    extract_ok( $alias.q(("","car")) => '', $prefix . 'ignore empty string' );
+    extract_ok( $alias.q(("0"))      => '', $prefix . 'ignore zero' );
 
     extract_ok( <<'__EXAMPLE__' => "123\n", "Simple extraction (heredoc)" );
 _(<<__LOC__);
@@ -292,3 +300,5 @@ sub write_po_ok {
     $Ext->clear;
 }
 
+
+done_testing;
