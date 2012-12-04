@@ -987,19 +987,19 @@ SKIP: {
 
     extract_ok(
         qq( key: { s1: _"string_1", s2: _'string_2', s3: _'string'3'}\n) =>
-            q(string_1string'3string_2),
+            q(string'3string_1string_2),
         'YAML inline hash'
     );
 
     extract_ok(
         qq( - _"string_1"\n - _'string_2'\n - _'string'3'\n) =>
-            q(string_1string'3string_2),
+            q(string'3string_1string_2),
         'YAML array'
     );
 
     extract_ok(
         qq(key: [ _"string_1", _'string_2', _'string'3' ]\n) =>
-            q(string_1string'3string_2),
+            q(string'3string_1string_2),
         'YAML Inline arrays'
     );
 
@@ -1082,7 +1082,8 @@ sub extract_ok {
     my ( $text, $expected, $info, $verbatim ) = @_;
     $Ext->extract( '' => $text );
     $Ext->compile($verbatim);
-    my $result = join( '', %{ $Ext->lexicon } );
+    my %lexicon = %{ $Ext->lexicon };
+    my $result = join( '', map { $_ => $lexicon{$_} } sort keys %lexicon );
     is( $result, $expected, $info );
     $Ext->clear;
 }
