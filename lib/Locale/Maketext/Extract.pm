@@ -265,6 +265,7 @@ our %Known_Plugins = (
                     mason   => 'Locale::Maketext::Extract::Plugin::Mason',
                     generic => 'Locale::Maketext::Extract::Plugin::Generic',
                     formfu  => 'Locale::Maketext::Extract::Plugin::FormFu',
+                    haml    => 'Locale::Maketext::Extract::Plugin::Haml',
 );
 
 sub new {

@@ -22,6 +22,7 @@ lib/Locale/Maketext/Extract.pm
 lib/Locale/Maketext/Extract/Plugin/Base.pm
 lib/Locale/Maketext/Extract/Plugin/FormFu.pm
 lib/Locale/Maketext/Extract/Plugin/Generic.pm
+lib/Locale/Maketext/Extract/Plugin/Haml.pm
 lib/Locale/Maketext/Extract/Plugin/Mason.pm
 lib/Locale/Maketext/Extract/Plugin/Perl.pm
 lib/Locale/Maketext/Extract/Plugin/PPI.pm

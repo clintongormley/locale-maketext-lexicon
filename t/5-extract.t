@@ -1,7 +1,7 @@
 #! /usr/bin/perl -w
 use lib '../lib';
 use strict;
-use Test::More tests => 78;
+use Test::More tests => 83;
 
 use_ok('Locale::Maketext::Extract');
 my $Ext = Locale::Maketext::Extract->new();
@@ -1076,8 +1076,55 @@ msgstr ""
 __EXAMPLE__
 
 }
-
 #### END YAML TESTS ############
+
+#### BEGIN HAML TESTS ##########
+SKIP: {
+    skip( 'HAML unavailable', 1 ) unless eval { require Text::Haml };
+
+    my $Old_Ext = $Ext;
+    $Ext = Locale::Maketext::Extract->new( plugins => { haml => '*' } );
+
+    extract_ok( '%a{:href=>"#"}= "[+] " . l("string")' => "string", "HAML double quotes." );
+    extract_ok( '%a{:href=>"#"}= "[+] " . l("str\"ing")' => "str\"ing", "HAML double quotes with escaped \"." );
+    extract_ok( q|%a{:href=>"#"}= "[+] " . l('string')| => "string", "HAML single quotes." );
+    extract_ok( q|%a{:href=>"#"}= "[+] " . l('[_1] plus [_1] equals [_2].', 'two', 'five')| => "%1 plus %1 equals %2.", "HAML string with args." );
+
+    write_po_ok( <<'__EXAMPLE__' => <<'__EXPECTED__', "HAML file" );
+!!! 5
+%html
+  %head
+    %meta{:charset => "utf-8"}
+      %title title
+      %link{:rel=>"stylesheet", :href=>"/css/style.css"}
+      %script{:type=>"text/javascript", :src=>"/js/jquery-1.8.2.min.js"}
+  %body
+    %ul#nav
+      %li
+        %a{:href=>"#"}= l("Home")
+      %li
+        %a{:href=>"#"}= "[+] " . l("About")
+      %li
+        %a{:href=>"#"}= "[+] " . l('[_1] plus [_1] equals [_2].', 'two', 'five')
+__EXAMPLE__
+#. ('two', 'five')
+#: :1
+msgid "%1 plus %1 equals %2."
+msgstr ""
+
+#: :1
+msgid "About"
+msgstr ""
+
+#: :1
+msgid "Home"
+msgstr ""
+__EXPECTED__
+
+    $Ext = $Old_Ext;
+}
+#### END HAML TESTS ############
+
 
 sub extract_ok {
     my ( $text, $expected, $info, $verbatim ) = @_;
