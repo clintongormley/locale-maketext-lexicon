@@ -4,7 +4,8 @@ use strict;
 use Test::More tests => 87;
 
 use_ok('Locale::Maketext::Extract');
-my $Ext = Locale::Maketext::Extract->new();
+my $Ext = Locale::Maketext::Extract->new(
+            plugins => { 'Locale::Maketext::Extract::Plugin::Perl' => '*' } );
 
 # Standard Perl parser
 run_tests('perl - ');
