@@ -1,7 +1,7 @@
 #! /usr/bin/perl -w
 use lib '../lib';
 use strict;
-use Test::More tests => 87;
+use Test::More tests => 89;
 
 use_ok('Locale::Maketext::Extract');
 my $Ext = Locale::Maketext::Extract->new(
@@ -66,6 +66,9 @@ sub run_tests {
                 $prefix . 'Normalized \\\\ in q' );
     extract_ok( q(_("foo\bar")) => "foo\bar",
                 $prefix . 'Interpolated \b in qq' );
+
+    extract_ok( q(l( 'foo "bar" baz' );) => 'foo "bar" baz',
+                $prefix . 'Recognizes l() as a localization function' );
 
     extract_ok( q([% loc( 'foo "bar" baz' ) %]) => 'foo "bar" baz',
                 $prefix . 'Escaped double quote in text' );
