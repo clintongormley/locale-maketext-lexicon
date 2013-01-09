@@ -570,6 +570,11 @@ __PO__
 SKIP: {
     skip( 'Template.pm unavailable', 48 ) unless eval { require Template };
 
+    # Use just the TT2 parser, otherwise l() and
+    # loc() throw false positives in the Perl plugin
+    my $Old_Ext = $Ext;
+    $Ext = Locale::Maketext::Extract->new( plugins => { tt2 => '*' } );
+
     extract_ok( <<'__EXAMPLE__' => 'foo bar baz', 'trim the string (tt)' );
 [% |loc -%]
 foo bar baz
@@ -683,10 +688,6 @@ msgid "string"
 msgstr ""
 __EXAMPLE__
 
-# Use just the TT2 parser, otherwise loc() throws false positives in the Perl plugin
-    my $Old_Ext = $Ext;
-    $Ext = Locale::Maketext::Extract->new( plugins => { tt2 => '*' } );
-
     write_po_ok(
         q([% loc('string',arg) %]) =>
             <<'__EXAMPLE__', 'TT loc function - variable arg' );
@@ -704,8 +705,6 @@ __EXAMPLE__
 msgid "string"
 msgstr ""
 __EXAMPLE__
-
-    $Ext = $Old_Ext;
 
     write_po_ok( <<'__TT__' => <<'__EXAMPLE__', 'TT multiline filter' );
 [% | l(arg1,arg2) %]
@@ -970,6 +969,8 @@ __TT__
 msgid "my string"
 msgstr ""
 __EXAMPLE__
+
+    $Ext = $Old_Ext;
 
     #### END TT TESTS ############
 }
