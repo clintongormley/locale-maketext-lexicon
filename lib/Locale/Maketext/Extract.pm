@@ -78,7 +78,7 @@ Following formats of input files are supported:
 =item Perl source files  (plugin: perl)
 
 Valid localization function names are: C<translate>, C<maketext>,
-C<gettext>, C<loc>, C<x>, C<_> and C<__>.
+C<gettext>, C<l>, C<loc>, C<x>, C<_> and C<__>.
 
 For a slightly more accurate, but much slower Perl parser, you can  use the PPI
 plugin. This does not have a short name (like C<perl>), but must be specified
