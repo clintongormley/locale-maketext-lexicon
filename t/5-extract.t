@@ -38,6 +38,8 @@ $Ext->{wrap} = 0;
 SKIP: {
     skip( 'HTML::Mason unavailable', 6 ) unless eval { require HTML::Mason };
 
+    $Ext = Locale::Maketext::Extract->new( plugins => { mason => '*' } );
+
     write_po_ok( <<'__EXAMPLE__' => <<'__EXPECTED__', "HTML::Mason simple" );
 <&|/l&>string1</&>
 <&|/loc&>string2</&>
@@ -228,6 +230,8 @@ __EXPECTED__
 #### BEGIN Mason (aka Mason 2) TESTS ############
 SKIP: {
     skip( 'Mason unavailable', 6 ) unless eval { require Mason };
+
+    $Ext = Locale::Maketext::Extract->new( plugins => { mason => '*' } );
 
     write_po_ok( <<'__EXAMPLE__' => <<'__EXPECTED__', "Mason simple" );
 <%$.fl {%>string1</%>
@@ -465,6 +469,8 @@ __EXPECTED__
 SKIP: {
     skip( 'YAML.pm unavailable', 5 ) unless eval { require YAML };
 
+    $Ext = Locale::Maketext::Extract->new( plugins => { formfu => '*' } );
+
     extract_ok( "    content_loc: foo bar\n" => "foo bar", "html-formfu 1" );
     write_po_ok( <<"__YAML__", <<"__PO__", 'html-formfu 2' );
 ---
@@ -570,9 +576,6 @@ __PO__
 SKIP: {
     skip( 'Template.pm unavailable', 48 ) unless eval { require Template };
 
-    # Use just the TT2 parser, otherwise l() and
-    # loc() throw false positives in the Perl plugin
-    my $Old_Ext = $Ext;
     $Ext = Locale::Maketext::Extract->new( plugins => { tt2 => '*' } );
 
     extract_ok( <<'__EXAMPLE__' => 'foo bar baz', 'trim the string (tt)' );
@@ -970,14 +973,14 @@ msgid "my string"
 msgstr ""
 __EXAMPLE__
 
-    $Ext = $Old_Ext;
-
     #### END TT TESTS ############
 }
 
 #### BEGIN YAML TESTS ############
 SKIP: {
     skip( 'YAML.pm unavailable', 9 ) unless eval { require YAML };
+
+    $Ext = Locale::Maketext::Extract->new( plugins => { yaml => '*' } );
 
     extract_ok( qq(key: _"string"\n) => "string", "YAML double quotes" );
     extract_ok( qq(key: _'string'\n) => "string", "YAML single quotes" );
@@ -1082,7 +1085,6 @@ __EXAMPLE__
 SKIP: {
     skip( 'HAML unavailable', 1 ) unless eval { require Text::Haml };
 
-    my $Old_Ext = $Ext;
     $Ext = Locale::Maketext::Extract->new( plugins => { haml => '*' } );
 
     extract_ok( '%a{:href=>"#"}= "[+] " . l("string")' => "string", "HAML double quotes." );
@@ -1120,8 +1122,6 @@ msgstr ""
 msgid "Home"
 msgstr ""
 __EXPECTED__
-
-    $Ext = $Old_Ext;
 }
 #### END HAML TESTS ############
 
