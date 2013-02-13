@@ -48,6 +48,7 @@ t/3-big-endian.t
 t/4-encodings.t
 t/5-extract.t
 t/51-perlextract.t
+t/52-extractpluginselection.t
 t/55-runextract.t
 t/6-gettext.t
 t/61-badcharset.t
