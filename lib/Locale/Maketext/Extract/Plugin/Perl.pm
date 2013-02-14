@@ -42,6 +42,8 @@ Valid localization function names are:
 
 =item gettext
 
+=item l
+
 =item loc
 
 =item x
@@ -99,7 +101,7 @@ PARSER: {
 
         # various ways to spell the localization function
         $state == NUL
-            && m/\b(translate|maketext|gettext|__?|loc(?:ali[sz]e)?|x)/gc
+            && m/\b(translate|maketext|gettext|__?|loc(?:ali[sz]e)?|l|x)/gc
             && do { $state = BEG; redo };
         $state == BEG && m/^([\s\t\n]*)/gc && redo;
 

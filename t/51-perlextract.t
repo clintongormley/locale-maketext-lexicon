@@ -1,17 +1,18 @@
 #! /usr/bin/perl -w
 use lib '../lib';
 use strict;
-use Test::More tests => 87;
+use Test::More tests => 89;
 
 use_ok('Locale::Maketext::Extract');
-my $Ext = Locale::Maketext::Extract->new();
+my $Ext = Locale::Maketext::Extract->new(
+            plugins => { 'Locale::Maketext::Extract::Plugin::Perl' => '*' } );
 
 # Standard Perl parser
 run_tests('perl - ');
 
 SKIP: {
     # PPI parser
-    skip( 'PPI unavailable', 43 ) unless eval { require PPI };
+    skip( 'PPI unavailable', 44 ) unless eval { require PPI };
     $Ext = Locale::Maketext::Extract->new(
              plugins => { 'Locale::Maketext::Extract::Plugin::PPI' => '*' } );
     run_tests('ppi - ');
@@ -65,6 +66,9 @@ sub run_tests {
                 $prefix . 'Normalized \\\\ in q' );
     extract_ok( q(_("foo\bar")) => "foo\bar",
                 $prefix . 'Interpolated \b in qq' );
+
+    extract_ok( q(l( 'foo "bar" baz' );) => 'foo "bar" baz',
+                $prefix . 'Recognizes l() as a localization function' );
 
     extract_ok( q([% loc( 'foo "bar" baz' ) %]) => 'foo "bar" baz',
                 $prefix . 'Escaped double quote in text' );

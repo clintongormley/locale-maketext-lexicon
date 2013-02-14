@@ -1,7 +1,7 @@
 #! /usr/bin/perl -w
 use lib '../lib';
 use strict;
-use Test::More tests => 78;
+use Test::More tests => 83;
 
 use_ok('Locale::Maketext::Extract');
 my $Ext = Locale::Maketext::Extract->new();
@@ -37,6 +37,8 @@ $Ext->{wrap} = 0;
 #### BEGIN HTML::Mason (aka Mason 1) TESTS ############
 SKIP: {
     skip( 'HTML::Mason unavailable', 6 ) unless eval { require HTML::Mason };
+
+    $Ext = Locale::Maketext::Extract->new( plugins => { mason => '*' } );
 
     write_po_ok( <<'__EXAMPLE__' => <<'__EXPECTED__', "HTML::Mason simple" );
 <&|/l&>string1</&>
@@ -228,6 +230,8 @@ __EXPECTED__
 #### BEGIN Mason (aka Mason 2) TESTS ############
 SKIP: {
     skip( 'Mason unavailable', 6 ) unless eval { require Mason };
+
+    $Ext = Locale::Maketext::Extract->new( plugins => { mason => '*' } );
 
     write_po_ok( <<'__EXAMPLE__' => <<'__EXPECTED__', "Mason simple" );
 <%$.fl {%>string1</%>
@@ -465,6 +469,8 @@ __EXPECTED__
 SKIP: {
     skip( 'YAML.pm unavailable', 5 ) unless eval { require YAML };
 
+    $Ext = Locale::Maketext::Extract->new( plugins => { formfu => '*' } );
+
     extract_ok( "    content_loc: foo bar\n" => "foo bar", "html-formfu 1" );
     write_po_ok( <<"__YAML__", <<"__PO__", 'html-formfu 2' );
 ---
@@ -569,6 +575,8 @@ __PO__
 #### BEGIN TT TESTS ############
 SKIP: {
     skip( 'Template.pm unavailable', 48 ) unless eval { require Template };
+
+    $Ext = Locale::Maketext::Extract->new( plugins => { tt2 => '*' } );
 
     extract_ok( <<'__EXAMPLE__' => 'foo bar baz', 'trim the string (tt)' );
 [% |loc -%]
@@ -683,10 +691,6 @@ msgid "string"
 msgstr ""
 __EXAMPLE__
 
-# Use just the TT2 parser, otherwise loc() throws false positives in the Perl plugin
-    my $Old_Ext = $Ext;
-    $Ext = Locale::Maketext::Extract->new( plugins => { tt2 => '*' } );
-
     write_po_ok(
         q([% loc('string',arg) %]) =>
             <<'__EXAMPLE__', 'TT loc function - variable arg' );
@@ -704,8 +708,6 @@ __EXAMPLE__
 msgid "string"
 msgstr ""
 __EXAMPLE__
-
-    $Ext = $Old_Ext;
 
     write_po_ok( <<'__TT__' => <<'__EXAMPLE__', 'TT multiline filter' );
 [% | l(arg1,arg2) %]
@@ -978,6 +980,8 @@ __EXAMPLE__
 SKIP: {
     skip( 'YAML.pm unavailable', 9 ) unless eval { require YAML };
 
+    $Ext = Locale::Maketext::Extract->new( plugins => { yaml => '*' } );
+
     extract_ok( qq(key: _"string"\n) => "string", "YAML double quotes" );
     extract_ok( qq(key: _'string'\n) => "string", "YAML single quotes" );
     extract_ok(
@@ -1075,8 +1079,52 @@ msgstr ""
 __EXAMPLE__
 
 }
-
 #### END YAML TESTS ############
+
+#### BEGIN HAML TESTS ##########
+SKIP: {
+    skip( 'HAML unavailable', 1 ) unless eval { require Text::Haml };
+
+    $Ext = Locale::Maketext::Extract->new( plugins => { haml => '*' } );
+
+    extract_ok( '%a{:href=>"#"}= "[+] " . l("string")' => "string", "HAML double quotes." );
+    extract_ok( '%a{:href=>"#"}= "[+] " . l("str\"ing")' => "str\"ing", "HAML double quotes with escaped \"." );
+    extract_ok( q|%a{:href=>"#"}= "[+] " . l('string')| => "string", "HAML single quotes." );
+    extract_ok( q|%a{:href=>"#"}= "[+] " . l('[_1] plus [_1] equals [_2].', 'two', 'five')| => "%1 plus %1 equals %2.", "HAML string with args." );
+
+    write_po_ok( <<'__EXAMPLE__' => <<'__EXPECTED__', "HAML file" );
+!!! 5
+%html
+  %head
+    %meta{:charset => "utf-8"}
+      %title title
+      %link{:rel=>"stylesheet", :href=>"/css/style.css"}
+      %script{:type=>"text/javascript", :src=>"/js/jquery-1.8.2.min.js"}
+  %body
+    %ul#nav
+      %li
+        %a{:href=>"#"}= l("Home")
+      %li
+        %a{:href=>"#"}= "[+] " . l("About")
+      %li
+        %a{:href=>"#"}= "[+] " . l('[_1] plus [_1] equals [_2].', 'two', 'five')
+__EXAMPLE__
+#. ('two', 'five')
+#: :1
+msgid "%1 plus %1 equals %2."
+msgstr ""
+
+#: :1
+msgid "About"
+msgstr ""
+
+#: :1
+msgid "Home"
+msgstr ""
+__EXPECTED__
+}
+#### END HAML TESTS ############
+
 
 sub extract_ok {
     my ( $text, $expected, $info, $verbatim ) = @_;

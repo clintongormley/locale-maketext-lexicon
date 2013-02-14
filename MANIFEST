@@ -22,6 +22,7 @@ lib/Locale/Maketext/Extract.pm
 lib/Locale/Maketext/Extract/Plugin/Base.pm
 lib/Locale/Maketext/Extract/Plugin/FormFu.pm
 lib/Locale/Maketext/Extract/Plugin/Generic.pm
+lib/Locale/Maketext/Extract/Plugin/Haml.pm
 lib/Locale/Maketext/Extract/Plugin/Mason.pm
 lib/Locale/Maketext/Extract/Plugin/Perl.pm
 lib/Locale/Maketext/Extract/Plugin/PPI.pm
@@ -47,6 +48,7 @@ t/3-big-endian.t
 t/4-encodings.t
 t/5-extract.t
 t/51-perlextract.t
+t/52-extractpluginselection.t
 t/55-runextract.t
 t/6-gettext.t
 t/61-badcharset.t

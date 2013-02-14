@@ -78,7 +78,7 @@ Following formats of input files are supported:
 =item Perl source files  (plugin: perl)
 
 Valid localization function names are: C<translate>, C<maketext>,
-C<gettext>, C<loc>, C<x>, C<_> and C<__>.
+C<gettext>, C<l>, C<loc>, C<x>, C<_> and C<__>.
 
 For a slightly more accurate, but much slower Perl parser, you can  use the PPI
 plugin. This does not have a short name (like C<perl>), but must be specified
@@ -195,10 +195,10 @@ Each plugin can also specify which file types it can parse.
         'My::Extract::Parser'  => []
     })
 
-
-By default, if no plugins are specified, then it uses all of the builtin
-plugins, and overrides the file types specified in each plugin
- - instead, each plugin is tried for every file.
+By default, if no plugins are specified, it first tries to determine which
+plugins are intended specifically for the file type and uses them. If no
+such plugins are found, it then uses all of the builtin plugins, overriding
+the file types specified in each.
 
 =head3 Available plugins
 
@@ -265,13 +265,14 @@ our %Known_Plugins = (
                     mason   => 'Locale::Maketext::Extract::Plugin::Mason',
                     generic => 'Locale::Maketext::Extract::Plugin::Generic',
                     formfu  => 'Locale::Maketext::Extract::Plugin::FormFu',
+                    haml    => 'Locale::Maketext::Extract::Plugin::Haml',
 );
 
 sub new {
     my $class   = shift;
     my %params  = @_;
     my $plugins = delete $params{plugins}
-        || { map { $_ => '*' } keys %Known_Plugins };
+        || { map { $_ => undef } keys %Known_Plugins };
 
     Locale::Maketext::Lexicon::set_option( 'keep_fuzzy' => 1 );
     my $self = bless( {  header           => '',
@@ -346,7 +347,9 @@ sub plugins {
                     if $self->{warnings};
                 next;
             };
-            push @plugins, $plugin_class->new( $params{$name} );
+
+            my $plugin = $params{$name} ? $plugin_class->new($params{$name}) : $plugin_class->new;
+            push @plugins, $plugin;
         }
         $self->{plugins} = \@plugins;
     }
@@ -474,48 +477,53 @@ sub extract {
     my ( @messages, $total, $error_found );
     $total = 0;
     my $verbose = $self->{verbose};
-    foreach my $plugin ( @{ $self->plugins } ) {
-        if ( $plugin->known_file_type($file) ) {
-            pos($content) = 0;
-            my $success = eval { $plugin->extract($content); 1; };
-            if ($success) {
-                my $entries = $plugin->entries;
-                if ( $verbose > 1 && @$entries ) {
-                    push @messages,
-                          "     - "
-                        . ref($plugin)
-                        . ' - Strings extracted : '
-                        . ( scalar @$entries );
-                }
-                for my $entry (@$entries) {
-                    my ( $string, $line, $vars ) = @$entry;
-                    $self->add_entry( $string => [ $file, $line, $vars ] );
-                    if ( $verbose > 2 ) {
-                        $vars = '' if !defined $vars;
 
-                        # pad string
-                        $string =~ s/\n/\n               /g;
-                        push @messages,
-                            sprintf( qq[       - %-8s "%s" (%s)],
-                                     $line . ':',
-                                     $string, $vars
-                            ),
-                            ;
-                    }
-                }
-                $total += @$entries;
+    my @plugins = $self->_plugins_specifically_for_file($file);
+
+    # If there's no plugin which can handle this file
+    # specifically, fall back trying with all known plugins.
+    @plugins = @{$self->plugins} if not @plugins;
+
+    foreach my $plugin ( @plugins ) {
+        pos($content) = 0;
+        my $success = eval { $plugin->extract($content); 1; };
+        if ($success) {
+            my $entries = $plugin->entries;
+            if ( $verbose > 1 && @$entries ) {
+                push @messages,
+                      "     - "
+                    . ref($plugin)
+                    . ' - Strings extracted : '
+                    . ( scalar @$entries );
             }
-            else {
-                $error_found++;
-                if ( $self->{warnings} ) {
+            for my $entry (@$entries) {
+                my ( $string, $line, $vars ) = @$entry;
+                $self->add_entry( $string => [ $file, $line, $vars ] );
+                if ( $verbose > 2 ) {
+                    $vars = '' if !defined $vars;
+
+                    # pad string
+                    $string =~ s/\n/\n               /g;
                     push @messages,
-                          "Error parsing '$file' with plugin "
-                        . ( ref $plugin )
-                        . ": \n $@\n";
+                        sprintf( qq[       - %-8s "%s" (%s)],
+                                 $line . ':',
+                                 $string, $vars
+                        ),
+                        ;
                 }
             }
-            $plugin->clear;
+            $total += @$entries;
         }
+        else {
+            $error_found++;
+            if ( $self->{warnings} ) {
+                push @messages,
+                      "Error parsing '$file' with plugin "
+                    . ( ref $plugin )
+                    . ": \n $@\n";
+            }
+        }
+        $plugin->clear;
     }
 
     print STDERR " * $file\n   - Total strings extracted : $total"
@@ -651,6 +659,7 @@ sub msg_out {
     _maketext_to_gettext
     _escape
     _format
+    _plugins_specifically_for_file
 
 =cut
 
@@ -713,6 +722,21 @@ sub _format {
         $str .= "\"\n";
     }
     return $multi_line ? qq(""\n"$str) : qq("$str);
+}
+
+sub _plugins_specifically_for_file {
+    my ($self, $file) = @_;
+
+    return () if not $file;
+
+    my @plugins = grep {
+        my $plugin = $_;
+        my @file_types = $plugin->file_types;
+        my $is_generic = (scalar @file_types == 1 and $file_types[0] eq '*');
+        (not $is_generic and $plugin->known_file_type($file));
+    } @{$self->plugins};
+
+    return @plugins;
 }
 
 1;
