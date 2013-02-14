@@ -12,7 +12,7 @@ run_tests('perl - ');
 
 SKIP: {
     # PPI parser
-    skip( 'PPI unavailable', 43 ) unless eval { require PPI };
+    skip( 'PPI unavailable', 44 ) unless eval { require PPI };
     $Ext = Locale::Maketext::Extract->new(
              plugins => { 'Locale::Maketext::Extract::Plugin::PPI' => '*' } );
     run_tests('ppi - ');
