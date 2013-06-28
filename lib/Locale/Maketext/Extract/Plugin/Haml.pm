@@ -54,7 +54,8 @@ sub extract {
     # Checking for expr and text allows us to recognise
     # the types of HTML entries we are interested in.
     my @texts = map { $_->{text} }
-        grep { $_->{expr} and $_->{text} } @{ $haml->tape };
+      grep { $_->{text} and ( $_->{expr} or $_->{type} eq 'block') }
+          @{ $haml->tape };
 
     my $perl = Locale::Maketext::Extract::Plugin::Perl->new;
 

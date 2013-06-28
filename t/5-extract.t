@@ -1,7 +1,7 @@
 #! /usr/bin/perl -w
 use lib '../lib';
 use strict;
-use Test::More tests => 83;
+use Test::More tests => 84;
 
 use_ok('Locale::Maketext::Extract');
 my $Ext = Locale::Maketext::Extract->new();
@@ -1083,7 +1083,7 @@ __EXAMPLE__
 
 #### BEGIN HAML TESTS ##########
 SKIP: {
-    skip( 'HAML unavailable', 5 ) unless eval { require Text::Haml };
+    skip( 'HAML unavailable', 6 ) unless eval { require Text::Haml };
 
     $Ext = Locale::Maketext::Extract->new( plugins => { haml => '*' } );
 
@@ -1091,6 +1091,7 @@ SKIP: {
     extract_ok( '%a{:href=>"#"}= "[+] " . l("str\"ing")' => "str\"ing", "HAML double quotes with escaped \"." );
     extract_ok( q|%a{:href=>"#"}= "[+] " . l('string')| => "string", "HAML single quotes." );
     extract_ok( q|%a{:href=>"#"}= "[+] " . l('[_1] plus [_1] equals [_2].', 'two', 'five')| => "%1 plus %1 equals %2.", "HAML string with args." );
+    extract_ok( '- stash(title => l("My Title"))' => "My Title", "HAML Perl block.");
 
     write_po_ok( <<'__EXAMPLE__' => <<'__EXPECTED__', "HAML file" );
 !!! 5
