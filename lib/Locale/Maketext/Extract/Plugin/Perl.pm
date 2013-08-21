@@ -177,7 +177,7 @@ PARSER: {
             && m/^<<(\w*)/gc
             && do { $state = HERE; $quo = QUO7; $heredoc = $1; redo };
 
-        # jump ahaid and get the heredoc, then s/// also
+        # jump ahead and get the heredoc, then s/// also
         # resets the pos and we are back at the current pos
         $state == HERE
             && m/^.*\r?\n/gc
