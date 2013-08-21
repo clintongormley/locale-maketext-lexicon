@@ -100,7 +100,7 @@ sub _parse_extract_options {
     my $opts = shift;
 
     # If a list of plugins is specified, then we use those modules
-    # plus their default list of file extensionse
+    # plus their default list of file extensions
     # and warnings enabled by default
 
     my %extract_options

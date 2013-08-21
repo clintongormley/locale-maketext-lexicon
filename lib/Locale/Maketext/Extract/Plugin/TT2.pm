@@ -216,7 +216,7 @@ package Locale::Maketext::Extract::Plugin::TT2::Parser;
 
 use base 'Template::Parser';
 
-# disabled location() because it was adding unneccessary text
+# disabled location() because it was adding unnecessary text
 # to filter blocks
 #===================================
 sub location {''}
