@@ -540,9 +540,12 @@ sub extract {
 sub extract_file {
     my ( $self, $file ) = @_;
 
-    local ( $/, *FH );
+    local ( *FH );
     open FH, $file or die "Error reading from file '$file' : $!";
-    my $content = scalar <FH>;
+    my $content = do {
+        local $/;
+        scalar <FH>;
+    };
 
     $self->extract( $file => $content );
     close FH;
