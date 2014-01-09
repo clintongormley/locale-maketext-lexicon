@@ -1,3 +1,6 @@
+[Changes for 0.97 - 2014-01-09]
+* Localise $/ correctly (TOKUHIROM)
+
 [Changes for 0.96 - 2013-06-28]
 * Bumping - bad release
 
