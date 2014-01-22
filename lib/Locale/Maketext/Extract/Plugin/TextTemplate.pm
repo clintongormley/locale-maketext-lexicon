@@ -55,6 +55,7 @@ sub extract {
         {
 
             package Locale::Maketext::Extract::Plugin::TextTemplate::Parser;
+
             our @ISA = 'HTML::Parser';
             *{'text'} = sub {
                 my ( $self, $str, $is_cdata ) = @_;
