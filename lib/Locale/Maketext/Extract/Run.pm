@@ -69,7 +69,7 @@ sub run {
                     # Only extract from non-binary, normal files
                     return unless ( -f or -s ) and -T;
                     return
-                        if (/\.po$|\.bak$|~|,D|,B$/i)
+                        if (/\.pot?$|\.bak$|~|,D|,B$/i)
                         || (/^[\.#]/);
                     push @ARGV, $File::Find::name;
                 },
