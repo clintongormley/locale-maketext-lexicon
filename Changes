@@ -1,3 +1,8 @@
+[Changes for 0.99 - 2014-02-03]
+* Localise $/ correctly (TOKUHIROM)
+  This change was missing from 0.97
+
+
 [Changes for 0.98 - 2014-01-22]
 * Exclude POT files (gerhardj)
 
