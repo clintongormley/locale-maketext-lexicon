@@ -1,7 +1,7 @@
 #! /usr/bin/perl -w
 use lib '../lib';
 use strict;
-use Test::More tests => 84;
+use Test::More tests => 86;
 
 use_ok('Locale::Maketext::Extract');
 my $Ext = Locale::Maketext::Extract->new();
@@ -574,7 +574,7 @@ __PO__
 
 #### BEGIN TT TESTS ############
 SKIP: {
-    skip( 'Template.pm unavailable', 48 ) unless eval { require Template };
+    skip( 'Template.pm unavailable', 50 ) unless eval { require Template };
 
     $Ext = Locale::Maketext::Extract->new( plugins => { tt2 => '*' } );
 
@@ -960,13 +960,28 @@ msgid "string"
 msgstr ""
 __EXAMPLE__
 
+# Mojo tests
+
     extract_ok(
         q([% c.l('Hello, world!') %]) => "Hello, world!",
-        "Mojolicious syntax is supported correctly",
+        "Mojolicious c.l syntax is supported correctly",
     );
 
-    write_po_ok( <<'__TT__' => <<'__EXAMPLE__', 'Mojolicious and filter syntax' );
+    write_po_ok( <<'__TT__' => <<'__EXAMPLE__', 'Mojolicious and c.l filter syntax' );
 [% 'my string' | c.l %]
+__TT__
+#: :1
+msgid "my string"
+msgstr ""
+__EXAMPLE__
+
+    extract_ok(
+        q([% c.loc('Hello, world!') %]) => "Hello, world!",
+        "Mojolicious c.loc syntax is supported correctly",
+    );
+
+    write_po_ok( <<'__TT__' => <<'__EXAMPLE__', 'Mojolicious and c.loc filter syntax' );
+[% 'my string' | c.loc %]
 __TT__
 #: :1
 msgid "my string"

@@ -292,7 +292,9 @@ sub ident {
         }
 
         # Mojolicious TT syntax [% c.l('...') %]
-        elsif ( $ident->[0] eq "'c'" && $ident->[2] eq "'l'" ) {
+        elsif ( $ident->[0] eq "'c'"
+            && ( $ident->[2] eq "'l'" || $ident->[2] eq "'loc'" ) )
+        {
             $got_i18n = 1;
             splice( @$ident, 0, 2 );
         }
@@ -352,7 +354,9 @@ sub filter {
     return ''
         unless $name eq "'l'"
         or $name eq "'loc'"
-        or $name eq "'c.l'";
+        or $name eq "'c.l'"
+        or $name eq "'c.loc'";
+
     if ( strip_quotes($block) ) {
         $block =~ s/\\\\/\\/g;
         $args = join_args( $class->args($args) );
