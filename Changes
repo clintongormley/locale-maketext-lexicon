@@ -1,3 +1,6 @@
+[Changes for 1.00 - 2014-03-06]
+* Add missing support for c.loc()
+
 [Changes for 0.99 - 2014-02-03]
 * Localise $/ correctly (TOKUHIROM)
   This change was missing from 0.97
