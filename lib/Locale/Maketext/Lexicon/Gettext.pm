@@ -247,7 +247,7 @@ sub _gettext_to_maketext {
                 ([1-9]\d*|\*)           # 4 - variable
             )
     }{
-        $1 ? $1
+        $1 ? '%'
            : $2 ? "\[$2,"._unescape($3)."]"
                 : "[_$4]"
     }egx;
