@@ -462,7 +462,6 @@ sub lexicon_get_glob {
             while ( my ( $pkg, $filename ) = caller( $level++ ) ) {
                 next unless $pkg eq $package;
                 next unless -e $filename;
-                next;
 
                 $fh->open($filename) or die "Can't open $filename: $!";
                 last;
